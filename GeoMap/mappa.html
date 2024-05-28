@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Geo Localization App</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/papaparse/papaparse.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #map { height: 1200px; }
+        .info-popup { max-width: 200px; }
+        .info-popup dt { font-weight: bold; }
+        .info-popup dd { margin: 0 0 10px; }
+        .search-controls { margin-bottom: 10px; }
+        .search-controls label, .search-controls button { margin-right: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="search-controls">
+    <label for="searchColumn">Search Column:</label>
+    <select id="searchColumn"></select>
+
+    <label for="searchQuery">Search Query:</label>
+    <input type="text" id="searchQuery" placeholder="Enter search term...">
+
+    <button onclick="applySearch()">Search</button>
+</div>
+
+<div id="map"></div>
+
+<script>
+    var map = L.map('map').setView([40.4643608, 17.2470303], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    var markers = L.markerClusterGroup();
+    var allData = [];
+
+    // Assuming 'Particelle' is the layer you want from the Catasto category
+    var cadastralLayer = L.tileLayer.wms("https://wms.cartografia.agenziaentrate.gov.it/inspire/wms/ows01.php", {
+        layers: 'Particelle', // Replace with the actual layer name you need
+        format: 'image/png',
+        transparent: true,
+        attribution: "© Agenzia delle Entrate - WMS Catasto"
+    }).addTo(map);
+
+    // Existing code for adding markers from CSV data
+    document.addEventListener("DOMContentLoaded", function() {
+        Papa.parse("Taranto.ICP.Definitivo.csv", {
+            download: true,
+            header: true,
+            dynamicTyping: true,
+            complete: function(results) {
+                allData = results.data;
+                populateDropdown(results.meta.fields);
+                addMarkers(allData);
+            }
+        });
+    });
+
+
+
+    function populateDropdown(fields) {
+        var dropdown = document.getElementById('searchColumn');
+        fields.forEach(function(field) {
+            var option = new Option(field, field);
+            dropdown.add(option);
+        });
+    }
+
+    function applySearch() {
+        var selectedColumn = document.getElementById('searchColumn').value;
+        var searchQuery = document.getElementById('searchQuery').value.toLowerCase();
+        var filteredData = allData.filter(row => row[selectedColumn] && row[selectedColumn].toString().toLowerCase().includes(searchQuery));
+        markers.clearLayers();
+        addMarkers(filteredData);
+    }
+
+    function addMarkers(data) {
+        data.forEach(row => {
+            if (row.CoordinateX && row.CoordinateY) {
+                var popupContent = generatePopupContent(row);
+                var marker = L.marker([row.CoordinateX, row.CoordinateY]).bindPopup(popupContent);
+                markers.addLayer(marker);
+            }
+        });
+        map.addLayer(markers);
+    }
+
+    function generatePopupContent(row) {
+        var content = '<dl class="info-popup">';
+        Object.keys(row).forEach(key => {
+            if(key !== 'CoordinateX' && key !== 'CoordinateY' && row[key]) {
+                content += `<dt>${key}:</dt><dd>${row[key]}</dd>`;
+            }
+        });
+        content += '</dl>';
+        return content;
+    }
+</script>
+
+</body>
+</html>

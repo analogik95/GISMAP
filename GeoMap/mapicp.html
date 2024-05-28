@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Map Display with Advanced Filters</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <style>
+        body { display: flex; }
+        #sidebar { width: 300px; height: 100vh; overflow: auto; background: #f4f4f4; padding: 20px; box-sizing: border-box; }
+        #map { height: 100vh; flex-grow: 1; }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h3>Filter Data</h3>
+        <div>
+            <input type="checkbox" id="check_insegne" checked> Insegne d'esercizio<br>
+            <input type="checkbox" id="check_pubblicita" checked> Solo Pubblicità
+        </div>
+        <h3>Advanced Filters</h3>
+        <form id="filter-form">
+            <label for="filter-idoggetto">ID OGGETTO:</label>
+            <input type="text" id="filter-idoggetto"><br>
+            <label for="filter-idutente">IDUTENTE:</label>
+            <input type="text" id="filter-idutente"><br>
+            <label for="filter-ragione_sociale">RAGIONE SOCIALE:</label>
+            <input type="text" id="filter-ragione_sociale"><br>
+            <label for="filter-p_iva">P.IVA:</label>
+            <input type="text" id="filter-p_iva"><br>
+            <label for="filter-cod_f">COD_F:</label>
+            <input type="text" id="filter-cod_f"><br>
+            <button type="button" onclick="applyFilters()">Apply Filters</button>
+        </form>
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
